@@ -1,0 +1,43 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { type Lang, useTranslations } from "~/i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const body = lang === "zh"
+  ? {
+      lead: "我用一台老相机拍我每天经过的世界。",
+      paras: [
+        "拍照之于我，是把日子里那些不被注意的、却让人短暂停下来的瞬间留住。光线落在窗台上，午后的水汽，回家路上一段陌生的街角——它们短暂、安静，但确实存在过。",
+        "这个网站是一个慢慢生长的画册。「作品」是我已经收拾好的系列，「日志」是日常的零散记录。如果你愿意慢慢看，我会很高兴。",
+      ],
+      meta: ["现居 ——", "邮箱 hello@example.com"],
+    }
+  : {
+      lead: "I make photographs of the world I walk through every day.",
+      paras: [
+        "Photography, for me, is a way of holding on to the small, unnoticed moments that nonetheless ask us to pause — the light falling on a windowsill, afternoon mist, an unfamiliar corner on the way home. They are quiet and brief, but they happened.",
+        "This site is a slowly growing notebook. ‘Works’ are the series I have gathered together; ‘Journal’ is the everyday looking. Thank you for taking your time.",
+      ],
+      meta: ["Based in ——", "Email hello@example.com"],
+    };
+---
+
+<BaseLayout title={t("about.title")} lang={lang}>
+  <article class="px-6 pt-16 md:pt-24 pb-24">
+    <header class="max-w-[36rem] mx-auto">
+      <p class="meta">{t("about.title")}</p>
+      <p class="mt-4 font-serif text-2xl md:text-3xl leading-snug">{body.lead}</p>
+    </header>
+    <div class="prose-narrow mt-12 font-serif text-[var(--color-ink)]">
+      {body.paras.map((p) => <p>{p}</p>)}
+    </div>
+    <p class="mt-16 max-w-[36rem] mx-auto meta text-center space-x-4">
+      {body.meta.map((line) => <span>{line}</span>)}
+    </p>
+  </article>
+</BaseLayout>

@@ -1,0 +1,50 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { type Lang, pick, pathFor } from "~/i18n/ui";
+import { getEntries } from "astro:content";
+
+interface Props {
+  entry: CollectionEntry<"journal">;
+  lang: Lang;
+}
+
+const { entry, lang } = Astro.props;
+const title = pick(entry.data, "title", lang);
+const location = pick(entry.data, "location", lang);
+const photos = entry.data.photos.length ? await getEntries(entry.data.photos) : [];
+const cover = photos[0]?.data.image;
+const coverAlt = photos[0] ? pick(photos[0].data, "alt", lang) : title;
+
+const date = entry.data.date;
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, "0");
+const day = String(date.getDate()).padStart(2, "0");
+const dateStr = `${year}.${month}.${day}`;
+const href = pathFor(lang, `/journal/${year}/${month}/${entry.id.split("/").pop()}`);
+---
+
+<article class="grid grid-cols-12 gap-6 md:gap-10 py-10 border-t border-[var(--color-line)] first:border-t-0">
+  <div class="col-span-12 md:col-span-3 meta">
+    <div>{dateStr}</div>
+    {location && <div class="mt-1 normal-case tracking-normal">{location}</div>}
+  </div>
+  <div class="col-span-12 md:col-span-9">
+    <a href={href} class="block hover:!border-b-transparent group">
+      {cover && (
+        <div class="aspect-[3/2] overflow-hidden bg-[var(--color-line)] mb-5">
+          <img
+            src={cover}
+            alt={coverAlt}
+            loading="lazy"
+            decoding="async"
+            class="h-full w-full object-cover transition-[opacity] duration-500 group-hover:opacity-90"
+          />
+        </div>
+      )}
+      <h3 class="font-serif text-xl md:text-2xl">{title}</h3>
+      {photos.length > 1 && (
+        <p class="meta mt-2">{photos.length} {lang === "zh" ? "张" : "photos"}</p>
+      )}
+    </a>
+  </div>
+</article>

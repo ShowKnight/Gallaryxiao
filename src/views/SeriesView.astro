@@ -1,0 +1,66 @@
+---
+import { getEntries, type CollectionEntry } from "astro:content";
+import { render } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { type Lang, useTranslations, pathFor, pick } from "~/i18n/ui";
+
+interface Props {
+  entry: CollectionEntry<"series">;
+  lang: Lang;
+}
+const { entry, lang } = Astro.props;
+const t = useTranslations(lang);
+
+const title = pick(entry.data, "title", lang);
+const intro = pick(entry.data, "intro", lang);
+const yearLabel = entry.data.year_end
+  ? `${entry.data.year_start}–${entry.data.year_end}`
+  : `${entry.data.year_start}–${t("meta.ongoing")}`;
+
+const photos = entry.data.photos.length ? await getEntries(entry.data.photos) : [];
+
+// optional MDX body for series-level note
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={title} description={intro} lang={lang} wide>
+  <section class="px-6 pt-12 md:pt-20">
+    <p class="meta">{yearLabel}</p>
+    <h1 class="mt-2 font-serif text-3xl md:text-5xl leading-tight max-w-[40rem]">{title}</h1>
+    {intro && (
+      <div class="mt-8 prose-narrow font-serif text-[var(--color-ink)]">
+        <p>{intro}</p>
+      </div>
+    )}
+    <div class="mt-6 prose-narrow font-serif text-[var(--color-ink)]">
+      <Content />
+    </div>
+  </section>
+
+  <hr class="rule mx-6" />
+
+  <section class="px-6 pb-24">
+    <h2 class="meta mb-8">{t("series.photos")}</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-10">
+      {photos.map((p) => {
+        const alt = pick(p.data, "alt", lang);
+        const cap = pick(p.data, "caption", lang);
+        const href = pathFor(lang, `/works/${entry.id}/${p.id}`);
+        return (
+          <a href={href} class="block hover:!border-b-transparent group">
+            <div class="aspect-[4/5] overflow-hidden bg-[var(--color-line)]">
+              <img
+                src={p.data.image}
+                alt={alt}
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover transition-[opacity] duration-500 group-hover:opacity-90"
+              />
+            </div>
+            {cap && <p class="meta mt-2">{cap}</p>}
+          </a>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>

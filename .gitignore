@@ -1,0 +1,34 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# macOS
+.DS_Store
+
+# editor
+.vscode/
+.idea/
+
+# original photos must NOT enter git — see README
+/private/
+/photos-raw/
+*.RAF
+*.NEF
+*.CR2
+*.CR3
+*.ARW
+*.DNG
+*.psd

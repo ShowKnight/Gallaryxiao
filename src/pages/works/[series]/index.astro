@@ -1,0 +1,11 @@
+---
+import SeriesView from "~/views/SeriesView.astro";
+import { getSeriesPaths } from "~/lib/paths";
+
+export async function getStaticPaths() {
+  return getSeriesPaths();
+}
+
+const { entry } = Astro.props;
+---
+<SeriesView entry={entry} lang="zh" />

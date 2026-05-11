@@ -1,0 +1,23 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import SeriesCard from "~/components/SeriesCard.astro";
+import { type Lang, useTranslations } from "~/i18n/ui";
+import { getPublishedSeries } from "~/lib/paths";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const all = await getPublishedSeries();
+---
+
+<BaseLayout title={t("works.title")} lang={lang}>
+  <section class="px-6 pt-12 md:pt-20">
+    <p class="meta">{t("works.subtitle")}</p>
+    <h1 class="mt-2 font-serif text-3xl md:text-5xl leading-tight">{t("works.title")}</h1>
+  </section>
+  <section class="px-6 mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+    {all.map((s) => <SeriesCard series={s} lang={lang} />)}
+  </section>
+</BaseLayout>

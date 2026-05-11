@@ -1,0 +1,18 @@
+---
+import { type Lang, useTranslations } from "~/i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+const siteName = lang === "zh" ? "无名工作室" : "Untitled Studio";
+---
+
+<footer class="mt-24 border-t border-[var(--color-line)]">
+  <div class="mx-auto max-w-[72rem] px-6 py-10 flex flex-col md:flex-row gap-3 justify-between meta">
+    <span>© {year} {siteName} · {t("footer.copyright")}</span>
+    <span>{lang === "zh" ? "本站手工建造，慢慢生长。" : "Hand-built. Slowly grown."}</span>
+  </div>
+</footer>

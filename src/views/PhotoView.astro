@@ -1,0 +1,106 @@
+---
+import { getEntry, render, type CollectionEntry } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import PhotoFrame from "~/components/PhotoFrame.astro";
+import { type Lang, useTranslations, pathFor, pick } from "~/i18n/ui";
+
+interface Props {
+  seriesEntry: CollectionEntry<"series">;
+  photoId: string;
+  index: number;
+  total: number;
+  lang: Lang;
+}
+
+const { seriesEntry, photoId, index, total, lang } = Astro.props;
+const t = useTranslations(lang);
+
+const photo = await getEntry("photos", photoId);
+if (!photo) {
+  throw new Error(`Photo not found: ${photoId}`);
+}
+
+// Render the markdown body as the (zh) story by default.
+// For a more polished bilingual setup the user can later split bodies into per-locale files.
+const { Content: StoryContent } = await render(photo);
+
+const seriesTitle = pick(seriesEntry.data, "title", lang);
+const photoCaption = pick(photo.data, "caption", lang);
+const pageTitle = photoCaption || `${seriesTitle} — ${index + 1} / ${total}`;
+
+// prev / next within series
+const prevId = index > 0 ? seriesEntry.data.photos[index - 1].id : null;
+const nextId = index < total - 1 ? seriesEntry.data.photos[index + 1].id : null;
+const prevHref = prevId ? pathFor(lang, `/works/${seriesEntry.id}/${prevId}`) : null;
+const nextHref = nextId ? pathFor(lang, `/works/${seriesEntry.id}/${nextId}`) : null;
+const seriesHref = pathFor(lang, `/works/${seriesEntry.id}`);
+---
+
+<BaseLayout title={pageTitle} lang={lang}>
+  <nav class="px-6 pt-8 flex items-center justify-between meta">
+    <a href={seriesHref}>← {seriesTitle}</a>
+    <span>{index + 1} / {total}</span>
+  </nav>
+
+  <article class="mt-2">
+    <figure class="gallery-frame">
+      <img
+        src={photo.data.image}
+        alt={pick(photo.data, "alt", lang)}
+        width={photo.data.width}
+        height={photo.data.height}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        class="fade-in mx-auto max-h-[80vh] w-auto object-contain"
+      />
+      {(photoCaption || photo.data.location_zh || photo.data.date) && (
+        <figcaption class="mt-6 max-w-[36rem] mx-auto">
+          {photoCaption && (
+            <p class="font-serif text-[1.0625rem] leading-snug">{photoCaption}</p>
+          )}
+          {(pick(photo.data, "location", lang) || photo.data.date) && (
+            <p class="meta mt-3">
+              {[
+                pick(photo.data, "location", lang),
+                photo.data.date &&
+                  new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }).format(photo.data.date),
+              ]
+                .filter(Boolean)
+                .join("  ·  ")}
+            </p>
+          )}
+        </figcaption>
+      )}
+
+      <div class="prose-narrow mt-12 font-serif text-[var(--color-ink)]">
+        <StoryContent />
+      </div>
+
+      {(photo.data.camera || photo.data.film) && (
+        <p class="meta mt-10 text-center">
+          {[
+            photo.data.camera && `${t("photo.camera")}: ${photo.data.camera}`,
+            photo.data.film && `${t("photo.film")}: ${photo.data.film}`,
+          ]
+            .filter(Boolean)
+            .join("   ·   ")}
+        </p>
+      )}
+    </figure>
+  </article>
+
+  <nav class="mx-auto max-w-[36rem] px-6 mt-16 mb-24 flex items-center justify-between">
+    {prevHref ? (
+      <a href={prevHref} class="meta">← {t("photo.prev")}</a>
+    ) : <span></span>}
+    <a href={seriesHref} class="meta">{t("photo.backToSeries")}</a>
+    {nextHref ? (
+      <a href={nextHref} class="meta">{t("photo.next")} →</a>
+    ) : <span></span>}
+  </nav>
+</BaseLayout>

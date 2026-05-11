@@ -1,0 +1,82 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import SeriesCard from "~/components/SeriesCard.astro";
+import JournalListItem from "~/components/JournalListItem.astro";
+import { type Lang, useTranslations, pathFor, pick } from "~/i18n/ui";
+import { getPublishedSeries, getPublishedJournal } from "~/lib/paths";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const allSeries = await getPublishedSeries();
+const featured = allSeries.filter((s) => s.data.featured).slice(0, 3);
+const heroSeries = featured[0] ?? allSeries[0];
+const restSeries = featured.slice(1);
+
+const recentJournal = (await getPublishedJournal()).slice(0, 3);
+
+const heroAlt = heroSeries ? pick(heroSeries.data, "cover_alt", lang) || pick(heroSeries.data, "title", lang) : "";
+const heroTitle = heroSeries ? pick(heroSeries.data, "title", lang) : "";
+const heroIntro = heroSeries ? pick(heroSeries.data, "intro", lang) : "";
+const heroYear = heroSeries
+  ? heroSeries.data.year_end
+    ? `${heroSeries.data.year_start}–${heroSeries.data.year_end}`
+    : `${heroSeries.data.year_start}–${t("meta.ongoing")}`
+  : "";
+---
+
+<BaseLayout title="" lang={lang}>
+  {/* Hero: one image, big breath of whitespace, the most-recent / pinned series. */}
+  {heroSeries && (
+    <section class="px-6 pt-12 md:pt-20 pb-16">
+      <a
+        href={pathFor(lang, `/works/${heroSeries.id}`)}
+        class="block hover:!border-b-transparent group"
+      >
+        <div class="aspect-[3/2] overflow-hidden bg-[var(--color-line)]">
+          <img
+            src={heroSeries.data.cover}
+            alt={heroAlt}
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            class="h-full w-full object-cover transition-[opacity] duration-700 group-hover:opacity-95"
+          />
+        </div>
+        <div class="mt-8 max-w-[40rem]">
+          <p class="meta">{heroYear}</p>
+          <h1 class="mt-2 font-serif text-3xl md:text-5xl leading-tight">{heroTitle}</h1>
+          {heroIntro && (
+            <p class="mt-4 font-serif text-lg text-[var(--color-mute)] leading-snug line-clamp-3">
+              {heroIntro}
+            </p>
+          )}
+        </div>
+      </a>
+    </section>
+  )}
+
+  {restSeries.length > 0 && (
+    <section class="px-6 mt-12">
+      <h2 class="meta mb-8">{t("home.featured")}</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14">
+        {restSeries.map((s) => <SeriesCard series={s} lang={lang} />)}
+      </div>
+    </section>
+  )}
+
+  {recentJournal.length > 0 && (
+    <section class="px-6 mt-24">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="meta">{t("home.recent")}</h2>
+        <a href={pathFor(lang, "/journal")} class="meta">{t("home.viewAll")} →</a>
+      </div>
+      <div class="mt-4">
+        {recentJournal.map((e) => <JournalListItem entry={e} lang={lang} />)}
+      </div>
+    </section>
+  )}
+</BaseLayout>

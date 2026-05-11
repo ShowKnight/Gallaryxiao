@@ -1,0 +1,70 @@
+---
+import { type Lang, useTranslations, pick } from "~/i18n/ui";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  photo: CollectionEntry<"photos">;
+  lang: Lang;
+  /** Render with a wide gallery frame (single-photo page). When false, used as a smaller grid item. */
+  framed?: boolean;
+  /** Show the long story body below the photo. */
+  showStory?: boolean;
+  /** Optional pre-rendered story HTML (when caller already rendered the entry). */
+  storyHtml?: string;
+}
+
+const { photo, lang, framed = true, showStory = false, storyHtml } = Astro.props;
+const t = useTranslations(lang);
+
+const alt = pick(photo.data, "alt", lang);
+const caption = pick(photo.data, "caption", lang);
+const location = pick(photo.data, "location", lang);
+const dateStr = photo.data.date
+  ? new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(photo.data.date)
+  : "";
+---
+
+<figure class:list={["mx-auto", framed ? "gallery-frame" : ""]}>
+  <img
+    src={photo.data.image}
+    alt={alt}
+    width={photo.data.width}
+    height={photo.data.height}
+    loading="lazy"
+    decoding="async"
+    class="fade-in mx-auto max-h-[80vh] w-auto object-contain"
+  />
+
+  {(caption || location || dateStr) && (
+    <figcaption class="mt-6 max-w-[36rem] mx-auto">
+      {caption && <p class="font-serif text-[1.0625rem] leading-snug">{caption}</p>}
+      {(location || dateStr) && (
+        <p class="meta mt-3">
+          {[location, dateStr].filter(Boolean).join(" · ")}
+        </p>
+      )}
+    </figcaption>
+  )}
+
+  {showStory && storyHtml && (
+    <div
+      class="prose-narrow mt-12 font-serif text-[var(--color-ink)]"
+      set:html={storyHtml}
+    />
+  )}
+
+  {showStory && (photo.data.camera || photo.data.film) && (
+    <p class="meta mt-10 text-center">
+      {[
+        photo.data.camera && `${t("photo.camera")}: ${photo.data.camera}`,
+        photo.data.film && `${t("photo.film")}: ${photo.data.film}`,
+      ]
+        .filter(Boolean)
+        .join("   ·   ")}
+    </p>
+  )}
+</figure>

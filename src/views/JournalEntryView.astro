@@ -1,0 +1,61 @@
+---
+import { getEntries, render, type CollectionEntry } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { type Lang, useTranslations, pick } from "~/i18n/ui";
+
+interface Props {
+  entry: CollectionEntry<"journal">;
+  lang: Lang;
+}
+const { entry, lang } = Astro.props;
+const t = useTranslations(lang);
+
+const title = pick(entry.data, "title", lang);
+const location = pick(entry.data, "location", lang);
+const photos = entry.data.photos.length ? await getEntries(entry.data.photos) : [];
+const { Content } = await render(entry);
+
+const dateStr = new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+}).format(entry.data.date);
+---
+
+<BaseLayout title={title} lang={lang}>
+  <article class="px-6 pt-12 md:pt-20 pb-24">
+    <header class="max-w-[36rem] mx-auto text-center">
+      <p class="meta">{[dateStr, location].filter(Boolean).join("  ·  ")}</p>
+      <h1 class="mt-3 font-serif text-3xl md:text-4xl leading-tight">{title}</h1>
+    </header>
+
+    <div class="prose-narrow mt-10 font-serif text-[var(--color-ink)]">
+      <Content />
+    </div>
+
+    {photos.length > 0 && (
+      <div class="mt-16 space-y-16">
+        {photos.map((p) => {
+          const alt = pick(p.data, "alt", lang);
+          const cap = pick(p.data, "caption", lang);
+          return (
+            <figure class="mx-auto">
+              <img
+                src={p.data.image}
+                alt={alt}
+                loading="lazy"
+                decoding="async"
+                class="fade-in mx-auto max-h-[80vh] w-auto object-contain"
+              />
+              {cap && (
+                <figcaption class="mt-4 max-w-[36rem] mx-auto font-serif text-[var(--color-mute)] text-center">
+                  {cap}
+                </figcaption>
+              )}
+            </figure>
+          );
+        })}
+      </div>
+    )}
+  </article>
+</BaseLayout>

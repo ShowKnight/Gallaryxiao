@@ -1,0 +1,11 @@
+---
+import JournalEntryView from "~/views/JournalEntryView.astro";
+import { getJournalPaths } from "~/lib/paths";
+
+export async function getStaticPaths() {
+  return getJournalPaths();
+}
+
+const { entry } = Astro.props;
+---
+<JournalEntryView entry={entry} lang="zh" />

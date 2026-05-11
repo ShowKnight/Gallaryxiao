@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+/* ─── Design tokens ──────────────────────────────────────────────────────
+   Two principles:
+   1. Restraint. No brand color. Black, near-white, two greys.
+   2. Generous whitespace around photos = the gallery feeling.
+   ─────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* colors */
+  --color-paper: #faf9f6;        /* near-white, slightly warm — like photo paper */
+  --color-ink: #1a1a1a;          /* never pure black */
+  --color-mute: #6b6b6b;         /* secondary text */
+  --color-line: #e8e6e0;         /* hairline rules */
+
+  /* typography
+     Chinese: Songti for headings (serif), Heiti for body
+     English: a soft serif for headings, neutral sans for body */
+  --font-serif:
+    "Source Han Serif SC", "Noto Serif SC", "Songti SC",
+    "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Inter",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft Yahei",
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* type scale */
+  --text-display: 2.75rem;        /* hero / series title on large screens */
+  --text-title: 1.5rem;
+  --text-body: 1.0625rem;         /* 17px */
+  --text-meta: 0.8125rem;         /* 13px caption / metadata */
+
+  /* line heights */
+  --leading-prose: 1.75;
+  --leading-tight: 1.25;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────── */
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-prose);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms ease;
+}
+
+a:hover {
+  border-bottom-color: currentColor;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ─── Utility classes (used in components) ───────────────────────────── */
+.font-serif { font-family: var(--font-serif); }
+.font-sans  { font-family: var(--font-sans); }
+
+.prose-narrow {
+  max-width: 36rem;       /* ~576px — readable measure for personal narrative */
+  margin-inline: auto;
+  line-height: var(--leading-prose);
+}
+
+.prose-narrow p + p { margin-top: 1.25em; }
+
+/* hairline rules */
+.rule {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  margin: 4rem 0;
+}
+
+/* "gallery frame": the whitespace around a photo that gives it weight */
+.gallery-frame {
+  padding-inline: clamp(1rem, 6vw, 6rem);
+  padding-block: clamp(2rem, 8vh, 6rem);
+}
+
+/* metadata line: small, muted, generous letter-spacing */
+.meta {
+  font-size: var(--text-meta);
+  color: var(--color-mute);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* fade-in for images on load (subtle) */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.fade-in {
+  animation: fade-in 600ms ease-out both;
+}

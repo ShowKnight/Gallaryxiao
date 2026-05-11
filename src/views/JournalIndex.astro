@@ -1,0 +1,39 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import JournalListItem from "~/components/JournalListItem.astro";
+import { type Lang, useTranslations } from "~/i18n/ui";
+import { getPublishedJournal } from "~/lib/paths";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const entries = await getPublishedJournal();
+
+// group by year
+const byYear: Record<string, typeof entries> = {};
+for (const e of entries) {
+  const y = String(e.data.date.getFullYear());
+  (byYear[y] ??= []).push(e);
+}
+const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a));
+---
+
+<BaseLayout title={t("journal.title")} lang={lang}>
+  <section class="px-6 pt-12 md:pt-20">
+    <p class="meta">{t("journal.subtitle")}</p>
+    <h1 class="mt-2 font-serif text-3xl md:text-5xl leading-tight">{t("journal.title")}</h1>
+  </section>
+  <section class="px-6 mt-12">
+    {years.length === 0 && <p class="meta py-12">{t("journal.empty")}</p>}
+    {years.map((year) => (
+      <div class="mt-12">
+        <h2 class="font-serif text-2xl mb-4">{year}</h2>
+        <div>
+          {byYear[year].map((e) => <JournalListItem entry={e} lang={lang} />)}
+        </div>
+      </div>
+    ))}
+  </section>
+</BaseLayout>

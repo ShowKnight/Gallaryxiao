@@ -1,0 +1,60 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { type Lang, useTranslations } from "~/i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const body = lang === "zh"
+  ? {
+      lead: "若想聊一聊，请写信给我。",
+      email: "hello@example.com",
+      commission: {
+        title: t("contact.commission.title"),
+        text: "我接受少量的私人写真与家庭记录类约拍，主要在自然光下完成。如果我们的气质相合，请告诉我大致的想法、时间和地点，我会回复你具体的安排。",
+      },
+      socials: [
+        { label: "Instagram", href: "https://instagram.com/" },
+        { label: "微博", href: "https://weibo.com/" },
+      ],
+    }
+  : {
+      lead: "If you’d like to talk, please write.",
+      email: "hello@example.com",
+      commission: {
+        title: t("contact.commission.title"),
+        text: "I take on a small number of personal portrait and family commissions each year, working mostly in natural light. If our sensibilities feel right, write to me with a rough idea, dates, and a location, and I’ll reply with a plan.",
+      },
+      socials: [
+        { label: "Instagram", href: "https://instagram.com/" },
+      ],
+    };
+---
+
+<BaseLayout title={t("contact.title")} lang={lang}>
+  <article class="px-6 pt-16 md:pt-24 pb-24">
+    <header class="max-w-[36rem] mx-auto">
+      <p class="meta">{t("contact.title")}</p>
+      <p class="mt-4 font-serif text-2xl md:text-3xl leading-snug">{body.lead}</p>
+      <p class="mt-6 font-serif text-xl">
+        <a href={`mailto:${body.email}`}>{body.email}</a>
+      </p>
+    </header>
+
+    <hr class="rule mx-auto max-w-[36rem]" />
+
+    <section class="prose-narrow font-serif text-[var(--color-ink)]">
+      <h2 class="font-serif text-xl mb-4">{body.commission.title}</h2>
+      <p>{body.commission.text}</p>
+    </section>
+
+    <p class="mt-16 max-w-[36rem] mx-auto meta text-center space-x-6">
+      {body.socials.map((s) => (
+        <a href={s.href} target="_blank" rel="noopener">{s.label}</a>
+      ))}
+    </p>
+  </article>
+</BaseLayout>

@@ -1,0 +1,53 @@
+---
+import { type Lang, useTranslations, pathFor } from "~/i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Switch to the other language, preserving path as best we can.
+const otherLang: Lang = lang === "zh" ? "en" : "zh";
+const path = Astro.url.pathname;
+const stripped = lang === "zh" ? path : path.replace(/^\/en/, "") || "/";
+const switchHref = otherLang === "zh" ? stripped : `/en${stripped === "/" ? "" : stripped}`;
+
+const siteName = lang === "zh" ? "无名工作室" : "Untitled Studio";
+
+const nav = [
+  { href: pathFor(lang, "/works"), label: t("nav.works") },
+  { href: pathFor(lang, "/journal"), label: t("nav.journal") },
+  { href: pathFor(lang, "/about"), label: t("nav.about") },
+  { href: pathFor(lang, "/contact"), label: t("nav.contact") },
+];
+---
+
+<header class="border-b border-[var(--color-line)] bg-[var(--color-paper)]">
+  <div class="mx-auto max-w-[72rem] flex items-baseline justify-between px-6 py-6 md:py-8">
+    <a
+      href={pathFor(lang, "/")}
+      class="font-serif text-[1.25rem] tracking-wide hover:!border-b-transparent"
+    >
+      {siteName}
+    </a>
+    <nav class="flex items-baseline gap-6 text-[0.95rem]">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          class="text-[var(--color-ink)]"
+          aria-current={Astro.url.pathname.startsWith(item.href) && item.href !== pathFor(lang, "/") ? "page" : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+      <a
+        href={switchHref}
+        class="meta hover:!border-b-transparent"
+        aria-label={otherLang === "zh" ? "切换到中文" : "Switch to English"}
+      >
+        {t("lang.switch")}
+      </a>
+    </nav>
+  </div>
+</header>

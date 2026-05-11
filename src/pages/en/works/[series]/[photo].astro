@@ -1,0 +1,17 @@
+---
+import PhotoView from "~/views/PhotoView.astro";
+import { getPhotoPaths } from "~/lib/paths";
+
+export async function getStaticPaths() {
+  return getPhotoPaths();
+}
+
+const { seriesEntry, photoId, index, total } = Astro.props;
+---
+<PhotoView
+  seriesEntry={seriesEntry}
+  photoId={photoId}
+  index={index}
+  total={total}
+  lang="en"
+/>
