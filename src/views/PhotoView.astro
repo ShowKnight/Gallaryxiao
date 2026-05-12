@@ -3,6 +3,7 @@ import { getEntry, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import PhotoFrame from "~/components/PhotoFrame.astro";
 import { type Lang, useTranslations, pathFor, pick } from "~/i18n/ui";
+import { imageUrl, imageSrcset } from "~/lib/image";
 
 interface Props {
   seriesEntry: CollectionEntry<"series">;
@@ -45,7 +46,9 @@ const seriesHref = pathFor(lang, `/works/${seriesEntry.id}`);
   <article class="mt-2">
     <figure class="gallery-frame">
       <img
-        src={photo.data.image}
+        src={imageUrl(photo.data.image, { preset: "display-large" })}
+        srcset={imageSrcset(photo.data.image)}
+        sizes="(min-width: 1024px) 1024px, 100vw"
         alt={pick(photo.data, "alt", lang)}
         width={photo.data.width}
         height={photo.data.height}

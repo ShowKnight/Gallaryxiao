@@ -3,6 +3,7 @@ import { getEntries, type CollectionEntry } from "astro:content";
 import { render } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { type Lang, useTranslations, pathFor, pick } from "~/i18n/ui";
+import { imageUrl } from "~/lib/image";
 
 interface Props {
   entry: CollectionEntry<"series">;
@@ -50,7 +51,7 @@ const { Content } = await render(entry);
           <a href={href} class="block hover:!border-b-transparent group">
             <div class="aspect-[4/5] overflow-hidden bg-[var(--color-line)]">
               <img
-                src={p.data.image}
+                src={imageUrl(p.data.image, { preset: "display-medium" })}
                 alt={alt}
                 loading="lazy"
                 decoding="async"

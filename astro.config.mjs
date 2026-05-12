@@ -5,8 +5,15 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
+// Replace SITE_URL via env (Cloudflare Pages exposes it via project settings).
+// Locally / in PRs the fallback below is used.
+const SITE_URL = process.env.SITE_URL || 'https://shellyxiao.com';
+
+// CDN host for the photographs (Volcano veImageX). Override per-env via env var.
+const IMAGE_HOST = process.env.IMAGE_HOST || 'tos-cn-i-XXXX.volccdn.com';
+
 export default defineConfig({
-  site: 'https://example.com', // TODO: replace with real domain
+  site: SITE_URL,
   integrations: [mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
@@ -19,7 +26,7 @@ export default defineConfig({
     },
   },
   image: {
-    // allow remote photo CDNs (replace as needed)
-    domains: ['picsum.photos', 'images.unsplash.com'],
+    // Hosts we are allowed to reference from <Image> / <Picture>.
+    domains: ['picsum.photos', 'images.unsplash.com', IMAGE_HOST],
   },
 });

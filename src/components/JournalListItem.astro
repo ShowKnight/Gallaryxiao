@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { type Lang, pick, pathFor } from "~/i18n/ui";
+import { imageUrl } from "~/lib/image";
 import { getEntries } from "astro:content";
 
 interface Props {
@@ -33,7 +34,7 @@ const href = pathFor(lang, `/journal/${year}/${month}/${entry.id.split("/").pop(
       {cover && (
         <div class="aspect-[3/2] overflow-hidden bg-[var(--color-line)] mb-5">
           <img
-            src={cover}
+            src={imageUrl(cover, { preset: "display-medium" })}
             alt={coverAlt}
             loading="lazy"
             decoding="async"

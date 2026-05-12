@@ -137,24 +137,71 @@ src/
 
 ---
 
-## 部署
+## 部署到 Cloudflare Pages
 
-推荐 **Cloudflare Pages** 或 **Vercel**：
-- 连接 git 仓库；
-- 构建命令 `npm run build`；
-- 输出目录 `dist`；
-- 推送到 main 即自动部署。
+1. 登录 https://dash.cloudflare.com → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**。
+2. 选择本仓库 `ShowKnight/Gallaryxiao`，branch 选 `main`。
+3. 构建设置：
+   - Framework preset: **Astro**（会自动填好）
+   - Build command: `npm run build`
+   - Build output directory: `dist`
+4. **Environment variables** 加：
+   - `SITE_URL` = `https://shellyxiao.com`（或你的正式域名）
+   - `PUBLIC_IMAGE_HOST` = `tos-cn-i-XXXX.volccdn.com`（火山 veImageX 给你的访问域名）
+   - `IMAGE_HOST` = 同上
+   - `NODE_VERSION` = `22`
+5. 点 **Save and Deploy**，几分钟后给你一个 `xxx.pages.dev` 地址。
+6. **绑域名**：在 Pages 项目里 → **Custom domains** → Add → 输入 `shellyxiao.com` 和 `www.shellyxiao.com`。Cloudflare 自动签 HTTPS。
 
-记得在 `astro.config.mjs` 里把 `site` 改成正式域名（影响 sitemap 和 canonical URL）。
+---
+
+## 接火山引擎 veImageX
+
+veImageX 控制台：https://console.volcengine.com/imagex
+
+### 一次性配置
+
+1. **创建服务**：控制台 → 服务 → 新建。地域选"中国大陆"，记下"访问域名"（形如 `tos-cn-i-xxxx.volccdn.com`），填到 Cloudflare Pages 的 `PUBLIC_IMAGE_HOST` 环境变量里。
+2. **新建图片模板**（"模板管理"→ 新建）。这是 veImageX 的核心思想——你只上传一张原图，访问时通过模板名指定"要多大、什么格式"：
+   - `tplv-display-large`：长边 2400px、格式 AVIF、质量 80（单张照片页主图）
+   - `tplv-display-medium`：长边 1600px、AVIF、质量 80（系列网格、日志封面）
+   - `tplv-thumb-square`：800×800 居中裁剪、AVIF、质量 78（备用缩略图）
+3. **绑定自定义域名**（可选但推荐）：把 `img.shellyxiao.com` CNAME 到火山的访问域名。要求：在火山控制台先把图片域名加白名单，且需要 ICP 备案。
+
+### 怎么上传照片
+
+**方式 1：控制台手动上传**（最简单）
+- 控制台 → "资源管理" → 上传文件。
+- 上传后会得到一个 key，例如 `letters/2024-03-window.jpg`。
+- 把这个 key 填到 markdown 的 `image` 字段（不需要写完整 URL）：
+
+```markdown
+---
+image: "letters/2024-03-window.jpg"
+alt_zh: "..."
+---
+```
+
+代码会自动拼成 `https://{IMAGE_HOST}/letters/2024-03-window.jpg~tplv-display-large.avif`。
+
+**方式 2：用脚本批量上传**（适合一次传几十张）
+- 火山有 Node SDK `@volcengine/openapi`。我们可以加一个 `scripts/upload.mjs`，
+  扫描本地 `private/photos-raw/` 文件夹，把每张上传并打印对应的 key —— 等你需要的时候告诉我。
+
+### 兼容期
+
+`src/lib/image.ts` 里的 `imageUrl()` 对**非 veImageX 的 URL（如 picsum）直接放行**，所以现在 demo 还能跑。一旦你的真实图片传到 veImageX，把 `image:` 字段改成 key（或完整 URL），下次构建就走 veImageX 模板了。
 
 ---
 
 ## TODO（按优先级）
 
-- [ ] 接 CDN（Cloudflare Images / Bunny），替换占位的 picsum URL
-- [ ] 用真实作品替换 demo 内容（`src/content/series/*` 和 `photos/*`）
-- [ ] 改站名（`src/layouts/BaseLayout.astro` 和 `src/components/Header.astro` 里的 "无名工作室 / Untitled Studio"）
+- [ ] 改站名（`src/layouts/BaseLayout.astro` 和 `src/components/Header.astro` 里的 "无名工作室 / Untitled Studio" → "肖双巧 / Shelly Xiao" 之类）
+- [ ] 注册域名（建议 `shellyxiao.com`，可选加 `shellyxiao.photo`）
+- [ ] 在 veImageX 创建模板 + 服务，把 `PUBLIC_IMAGE_HOST` 填到 Cloudflare Pages 环境变量
+- [ ] 上传几张真实照片到 veImageX，把 `src/content/photos/*.md` 里的 image 字段从 picsum 换成 key
 - [ ] 自定义字体托管（思源宋体 / 思源黑体 woff2 放到 `public/fonts/`，在 `global.css` 里 `@font-face`）
-- [ ] 标签聚合页 `/tags/[tag]`（按计划 Phase 3）
+- [ ] 标签聚合页 `/tags/[tag]`
 - [ ] 站内搜索（Pagefind，纯静态、无后端）
+- [ ] 一个 `npm run upload-photo` 交互式 CLI（上传到 veImageX + 生成 markdown）
 - [ ] 一个 `npm run new-photo` 交互式 CLI，让作者不用记 frontmatter
