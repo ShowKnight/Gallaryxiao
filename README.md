@@ -137,6 +137,24 @@ src/
 
 ---
 
+## 部署到 GitHub Pages（最快上线）
+
+仓库已配好工作流 `.github/workflows/deploy.yml`，推送到 `main` 会自动构建并发布。
+
+**第一次需要手动开一下开关：**
+
+1. GitHub 仓库 → **Settings** → **Pages** → **Build and deployment** → Source 选 **GitHub Actions**。
+2. 把当前分支合并进 `main`（或直接在 Actions 页面手动运行 "Deploy to GitHub Pages"）。
+3. 等工作流跑完，站点上线在 **https://showknight.github.io/gallaryxiao/**。
+
+> 站点发布在子路径 `/gallaryxiao/` 下，所以 `astro.config.mjs` 里设了 `base: '/gallaryxiao/'`。
+> 本地 `npm run dev` / `npm run preview` 也会带这个前缀（`http://localhost:4321/gallaryxiao/`）。
+
+**换成自定义域名时**：把工作流里 build 步骤的环境变量设成 `SITE_URL=https://你的域名`
+与 `BASE_PATH=/`，新建 `public/CNAME`（内容就是域名一行），并在 Settings → Pages 填 Custom domain。
+
+---
+
 ## 部署到 Cloudflare Pages
 
 1. 登录 https://dash.cloudflare.com → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**。

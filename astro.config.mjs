@@ -5,15 +5,20 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
-// Replace SITE_URL via env (Cloudflare Pages exposes it via project settings).
-// Locally / in PRs the fallback below is used.
-const SITE_URL = process.env.SITE_URL || 'https://shellyxiao.com';
+// Replace SITE_URL via env. Defaults target GitHub Pages (project site).
+// For a custom domain set SITE_URL=https://example.com and BASE_PATH=/.
+const SITE_URL = process.env.SITE_URL || 'https://showknight.github.io';
+
+// Sub-path the site is served under. GitHub Pages project sites live at
+// /<repo>/; a custom domain or user/org page should set BASE_PATH=/.
+const BASE_PATH = process.env.BASE_PATH || '/gallaryxiao/';
 
 // CDN host for the photographs (Volcano veImageX). Override per-env via env var.
 const IMAGE_HOST = process.env.IMAGE_HOST || 'tos-cn-i-XXXX.volccdn.com';
 
 export default defineConfig({
   site: SITE_URL,
+  base: BASE_PATH,
   integrations: [mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()],

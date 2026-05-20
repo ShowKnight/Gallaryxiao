@@ -1,5 +1,5 @@
 ---
-import { type Lang, useTranslations, pathFor } from "~/i18n/ui";
+import { type Lang, useTranslations, pathFor, localelessPath } from "~/i18n/ui";
 
 interface Props {
   lang: Lang;
@@ -7,19 +7,18 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Switch to the other language, preserving path as best we can.
+// Switch to the other language, preserving the current path.
 const otherLang: Lang = lang === "zh" ? "en" : "zh";
-const path = Astro.url.pathname;
-const stripped = lang === "zh" ? path : path.replace(/^\/en/, "") || "/";
-const switchHref = otherLang === "zh" ? stripped : `/en${stripped === "/" ? "" : stripped}`;
+const here = localelessPath(Astro.url.pathname);
+const switchHref = pathFor(otherLang, here);
 
 const siteName = lang === "zh" ? "无名工作室" : "Untitled Studio";
 
 const nav = [
-  { href: pathFor(lang, "/works"), label: t("nav.works") },
-  { href: pathFor(lang, "/journal"), label: t("nav.journal") },
-  { href: pathFor(lang, "/about"), label: t("nav.about") },
-  { href: pathFor(lang, "/contact"), label: t("nav.contact") },
+  { to: "/works", label: t("nav.works") },
+  { to: "/journal", label: t("nav.journal") },
+  { to: "/about", label: t("nav.about") },
+  { to: "/contact", label: t("nav.contact") },
 ];
 ---
 
@@ -34,9 +33,9 @@ const nav = [
     <nav class="flex items-baseline gap-6 text-[0.95rem]">
       {nav.map((item) => (
         <a
-          href={item.href}
+          href={pathFor(lang, item.to)}
           class="text-[var(--color-ink)]"
-          aria-current={Astro.url.pathname.startsWith(item.href) && item.href !== pathFor(lang, "/") ? "page" : undefined}
+          aria-current={here.startsWith(item.to) ? "page" : undefined}
         >
           {item.label}
         </a>

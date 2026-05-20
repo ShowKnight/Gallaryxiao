@@ -26,7 +26,7 @@ const fullTitle = title ? `${title} — ${siteName}` : siteName;
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
     {description && <meta name="description" content={description} />}
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:type" content="website" />
     {description && <meta property="og:description" content={description} />}

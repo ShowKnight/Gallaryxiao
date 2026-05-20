@@ -8,6 +8,19 @@ export type Lang = keyof typeof languages;
 
 export const defaultLang: Lang = 'zh';
 
+// The site may be served under a sub-path (GitHub Pages project site).
+// import.meta.env.BASE_URL reflects astro.config `base` ("/gallaryxiao/" or "/").
+const BASE_TRIM = import.meta.env.BASE_URL.replace(/\/+$/, ''); // "/gallaryxiao" or ""
+
+/** Remove the deploy base prefix from a real URL pathname. */
+function stripBase(pathname: string): string {
+  if (BASE_TRIM && pathname.startsWith(BASE_TRIM)) {
+    const rest = pathname.slice(BASE_TRIM.length);
+    return rest.startsWith('/') ? rest : `/${rest}`;
+  }
+  return pathname;
+}
+
 export const ui = {
   zh: {
     'nav.works': '作品',
@@ -80,14 +93,23 @@ export function useTranslations(lang: Lang) {
 }
 
 export function getLangFromUrl(url: URL): Lang {
-  const [, maybeLang] = url.pathname.split('/');
+  const [, maybeLang] = stripBase(url.pathname).split('/');
   if (maybeLang in ui) return maybeLang as Lang;
   return defaultLang;
 }
 
 export function pathFor(lang: Lang, path: string): string {
   const clean = path.startsWith('/') ? path : `/${path}`;
-  return lang === defaultLang ? clean : `/${lang}${clean}`;
+  const withLang = lang === defaultLang ? clean : `/${lang}${clean}`;
+  return `${BASE_TRIM}${withLang}`;
+}
+
+/** A real URL pathname → logical path with no deploy base and no locale prefix. */
+export function localelessPath(pathname: string): string {
+  const segs = stripBase(pathname).split('/'); // e.g. ['', 'en', 'works']
+  if (segs[1] in ui) segs.splice(1, 1);
+  const p = segs.join('/');
+  return p === '' ? '/' : p;
 }
 
 // pick the localized field from a content entry (e.g. title_zh / title_en)
