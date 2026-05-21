@@ -23,14 +23,14 @@ const nav = [
 ---
 
 <header class="border-b border-[var(--color-line)] bg-[var(--color-paper)]">
-  <div class="mx-auto max-w-[72rem] flex items-baseline justify-between px-6 py-6 md:py-8">
+  <div class="mx-auto flex max-w-[72rem] flex-col gap-3 px-6 py-5 md:flex-row md:items-baseline md:justify-between md:py-8">
     <a
       href={pathFor(lang, "/")}
       class="font-serif text-[1.25rem] tracking-wide hover:!border-b-transparent"
     >
       {siteName}
     </a>
-    <nav class="flex items-baseline gap-6 text-[0.95rem]">
+    <nav class="flex flex-wrap items-baseline gap-x-5 gap-y-1 text-[0.95rem] md:gap-x-6">
       {nav.map((item) => (
         <a
           href={pathFor(lang, item.to)}

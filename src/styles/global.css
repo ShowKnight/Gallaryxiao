@@ -44,11 +44,18 @@ html {
   line-height: var(--leading-prose);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;            /* iOS: keep text size in landscape */
+  -webkit-tap-highlight-color: transparent;  /* iOS: no grey flash on tap */
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;                        /* iOS: track the dynamic viewport */
+  /* iPhone safe areas — needs viewport-fit=cover on the viewport meta */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 a {
@@ -60,6 +67,15 @@ a {
 
 a:hover {
   border-bottom-color: currentColor;
+}
+
+/* Touch devices: enlarge tap targets for small nav / meta links.
+   Scoped to coarse pointers so desktop hover underlines stay tight. */
+@media (pointer: coarse) {
+  nav a,
+  a.meta {
+    padding-block: 0.5rem;
+  }
 }
 
 img {
