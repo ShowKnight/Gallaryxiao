@@ -1,0 +1,101 @@
+---
+/**
+ * Unified image renderer.
+ *
+ * Accepts either:
+ *   - an ImageMetadata object  → a LOCAL image (from `image()` in the content
+ *     schema). Rendered through Astro's <Image>, which generates resized,
+ *     WebP, responsive variants at build time. This is the path for photos
+ *     committed into the repo (src/content/photos/_media/...).
+ *   - a string                → a REMOTE URL. Rendered as a plain <img>,
+ *     optionally rewritten through the veImageX helper. Kept so the picsum
+ *     placeholders (and any future CDN) still work.
+ *
+ * `preset` picks a sensible set of responsive widths + a default `sizes`.
+ */
+import { Image } from "astro:assets";
+import { imageUrl, imageSrcset } from "~/lib/image";
+
+type Preset = "large" | "medium";
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  preset?: Preset;
+  class?: string;
+  sizes?: string;
+  loading?: "lazy" | "eager";
+  fetchpriority?: "high" | "auto";
+  /** Remote images only: intrinsic size hint to avoid layout shift. */
+  width?: number;
+  height?: number;
+}
+
+const {
+  src,
+  alt,
+  preset = "large",
+  class: className,
+  sizes,
+  loading = "lazy",
+  fetchpriority,
+  width,
+  height,
+} = Astro.props;
+
+const PRESETS = {
+  large: {
+    widths: [1080, 1620, 2400],
+    sizes: "(min-width: 1024px) 1024px, 100vw",
+  },
+  medium: {
+    widths: [600, 1000, 1600],
+    sizes: "(min-width: 768px) 45vw, 100vw",
+  },
+} as const;
+
+const cfg = PRESETS[preset];
+const resolvedSizes = sizes ?? cfg.sizes;
+const isLocal = typeof src !== "string";
+
+// Local images: never request a width larger than the source file.
+let localWidths: number[] = [];
+if (isLocal) {
+  const meta = src as ImageMetadata;
+  localWidths = cfg.widths.filter((w) => w <= meta.width);
+  if (localWidths.length === 0) localWidths = [meta.width];
+}
+
+const remotePreset = preset === "large" ? "display-large" : "display-medium";
+const extra = fetchpriority ? { fetchpriority } : {};
+---
+
+{
+  isLocal ? (
+    <Image
+      src={src as ImageMetadata}
+      alt={alt}
+      widths={localWidths}
+      sizes={resolvedSizes}
+      format="webp"
+      quality={82}
+      loading={loading}
+      decoding="async"
+      class={className}
+      {...extra}
+    />
+  ) : (
+    <img
+      src={imageUrl(src as string, { preset: remotePreset })}
+      srcset={imageSrcset(src as string)}
+      sizes={resolvedSizes}
+      alt={alt}
+      width={width}
+      height={height}
+      loading={loading}
+      decoding="async"
+      class={className}
+      {...extra}
+    />
+  )
+}

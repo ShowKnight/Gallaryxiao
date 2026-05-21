@@ -3,7 +3,7 @@ import BaseLayout from "~/layouts/BaseLayout.astro";
 import SeriesCard from "~/components/SeriesCard.astro";
 import JournalListItem from "~/components/JournalListItem.astro";
 import { type Lang, useTranslations, pathFor, pick } from "~/i18n/ui";
-import { imageUrl, imageSrcset } from "~/lib/image";
+import Img from "~/components/Img.astro";
 import { getPublishedSeries, getPublishedJournal } from "~/lib/paths";
 
 interface Props {
@@ -38,14 +38,12 @@ const heroYear = heroSeries
         class="block hover:!border-b-transparent group"
       >
         <div class="aspect-[3/2] overflow-hidden bg-[var(--color-line)]">
-          <img
-            src={imageUrl(heroSeries.data.cover, { preset: "display-large" })}
-            srcset={imageSrcset(heroSeries.data.cover)}
-            sizes="(min-width: 1024px) 1024px, 100vw"
+          <Img
+            src={heroSeries.data.cover}
             alt={heroAlt}
+            preset="large"
             loading="eager"
             fetchpriority="high"
-            decoding="async"
             class="h-full w-full object-cover transition-[opacity] duration-700 group-hover:opacity-95"
           />
         </div>

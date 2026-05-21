@@ -2,7 +2,7 @@
 import { getEntries, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { type Lang, useTranslations, pick } from "~/i18n/ui";
-import { imageUrl, imageSrcset } from "~/lib/image";
+import Img from "~/components/Img.astro";
 
 interface Props {
   entry: CollectionEntry<"journal">;
@@ -41,13 +41,10 @@ const dateStr = new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", {
           const cap = pick(p.data, "caption", lang);
           return (
             <figure class="mx-auto">
-              <img
-                src={imageUrl(p.data.image, { preset: "display-large" })}
-                srcset={imageSrcset(p.data.image)}
-                sizes="(min-width: 1024px) 1024px, 100vw"
+              <Img
+                src={p.data.image}
                 alt={alt}
-                loading="lazy"
-                decoding="async"
+                preset="large"
                 class="fade-in mx-auto max-h-[80vh] w-auto object-contain"
               />
               {cap && (

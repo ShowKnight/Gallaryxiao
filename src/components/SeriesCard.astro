@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { type Lang, pick, pathFor, useTranslations } from "~/i18n/ui";
-import { imageUrl } from "~/lib/image";
+import Img from "~/components/Img.astro";
 
 interface Props {
   series: CollectionEntry<"series">;
@@ -28,11 +28,10 @@ const href = pathFor(lang, `/works/${series.id}`);
   ]}
 >
   <div class:list={[feature ? "aspect-[3/2]" : "aspect-[4/5]", "overflow-hidden bg-[var(--color-line)]"]}>
-    <img
-      src={imageUrl(series.data.cover, { preset: "display-medium" })}
+    <Img
+      src={series.data.cover}
       alt={coverAlt}
-      loading="lazy"
-      decoding="async"
+      preset="medium"
       class="h-full w-full object-cover transition-[opacity] duration-500 group-hover:opacity-90"
     />
   </div>

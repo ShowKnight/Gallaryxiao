@@ -25,14 +25,28 @@ npm run preview      # 预览构建产物
 
 ### 添加一张新照片
 
-1. 在 `src/content/photos/` 新建一个文件，例如 `2025-08-rainy-day.md`。
-2. 内容如下：
+照片图片直接放进仓库，由 GitHub Pages 托管。**唯一的铁律：进仓库前必须先压缩**——相机原图一张 5MB+，绝不能直接 commit。
+
+**第 1 步 · 压缩图片**
+
+把相机原图（可以一次选很多张）丢给压缩脚本：
+
+```bash
+npm run prep -- ~/Desktop/相机原图/*.jpg
+# 想给文件名统一前缀（按系列分组），加 --prefix：
+npm run prep -- ~/Desktop/letters/*.jpg --prefix letters
+```
+
+脚本会自动：缩到长边 2400px、转 sRGB、**剥掉 EXIF/GPS**、压成 ~300–800KB 的 JPEG，
+输出到 `src/content/photos/_media/`。原图你自己在硬盘/网盘留底就行，不进仓库。
+
+**第 2 步 · 新建照片 markdown**
+
+在 `src/content/photos/` 新建一个文件，例如 `2025-08-rainy-day.md`：
 
 ```markdown
 ---
-image: "https://your-cdn.com/path/to/photo.jpg"   # 图片 URL（CDN）
-width: 2000                                        # 可选，但有助于布局
-height: 1333
+image: "./_media/rainy-day.jpg"   # 指向第 1 步压好的图（相对路径）
 alt_zh: "中文 alt（描述图片内容，给视障读者看）"
 alt_en: "English alt"
 caption_zh: "一句话说明（可空）"
@@ -48,8 +62,13 @@ film: "Kodak Portra 400"        # 可空
 （这里写长的故事，可有可无。直接用 markdown 写就行。）
 ```
 
-> **重要**：`image` 字段不要指向本地原图。原图永远不要放进 git 仓库。
-> 推荐做法：把展示版（长边 2400px、sRGB、嵌入版权）上传到 Cloudflare Images / Bunny CDN / ImageKit，把那里的 URL 填到 `image`。
+构建时 Astro 会自动从这张图再生成 WebP、多种屏幕尺寸、懒加载——你什么都不用管。
+
+> **`image` 字段两种写法**：
+> - `"./_media/xxx.jpg"` —— 仓库内的本地图（推荐，走 Astro 优化）
+> - `"https://..."` —— 远程 URL（以后若改用 CDN 仍兼容）
+>
+> **不要**把相机原图直接放进 `_media/`。永远先 `npm run prep` 压一遍。
 
 ### 添加一个新系列
 
@@ -64,7 +83,7 @@ year_start: 2024
 year_end: null            # null 表示进行中（自动显示「至今 / present」）
 intro_zh: "几句话的序言"
 intro_en: "A few sentences of foreword"
-cover: "https://your-cdn.com/cover.jpg"
+cover: "../photos/_media/your-photo-01.jpg"   # 复用系列里某张照片的图；也可填 https:// 远程 URL
 cover_alt_zh: "封面图描述"
 cover_alt_en: "Cover image description"
 photos:                   # 顺序就是展示顺序
@@ -114,16 +133,22 @@ src/
 ├── content/
 │   ├── series/               # 系列 ←
 │   ├── photos/               # 照片 ← 你主要在这三个目录里工作
+│   │   └── _media/           #   ← 压好的照片图片（npm run prep 生成）
 │   └── journal/              # 日志 ←
 ├── i18n/ui.ts                # 所有 UI 文案 (zh + en)
 ├── layouts/BaseLayout.astro
-├── components/               # Header, Footer, PhotoFrame, SeriesCard, JournalListItem
+├── components/               # Header, Footer, Img, PhotoFrame, SeriesCard, JournalListItem
 ├── views/                    # Home / WorksList / SeriesView / PhotoView / Journal* / About / Contact
 ├── pages/                    # 路由（每个文件就是一个页面）
 │   ├── *.astro               # 中文 (默认)
 │   └── en/...                # 英文镜像
-├── lib/paths.ts              # 共享的内容查询 / 路径生成
+├── lib/
+│   ├── paths.ts              # 共享的内容查询 / 路径生成
+│   └── image.ts              # 远程图片 URL helper（veImageX / CDN 兼容用）
 └── styles/global.css         # 设计令牌（颜色、字体、间距）
+
+scripts/
+└── prep-images.mjs           # npm run prep —— 把相机原图批量压成展示版
 ```
 
 ---
@@ -174,42 +199,20 @@ src/
 
 ---
 
-## 接火山引擎 veImageX
+## 图片托管
 
-veImageX 控制台：https://console.volcengine.com/imagex
+**当前方案：图片放进仓库，GitHub Pages 托管。** 流程见上面「添加一张新照片」——
+`npm run prep` 压缩 → 放进 `src/content/photos/_media/` → Astro 构建时再优化成 WebP/多尺寸。
 
-### 一次性配置
+这个方案对几百张照片、温和访问量完全够用（GitHub Pages 站点上限 1GB、流量
+100GB/月）。**铁律只有一条：进仓库前必须 `npm run prep` 压缩，绝不 commit 相机原图。**
 
-1. **创建服务**：控制台 → 服务 → 新建。地域选"中国大陆"，记下"访问域名"（形如 `tos-cn-i-xxxx.volccdn.com`），填到 Cloudflare Pages 的 `PUBLIC_IMAGE_HOST` 环境变量里。
-2. **新建图片模板**（"模板管理"→ 新建）。这是 veImageX 的核心思想——你只上传一张原图，访问时通过模板名指定"要多大、什么格式"：
-   - `tplv-display-large`：长边 2400px、格式 AVIF、质量 80（单张照片页主图）
-   - `tplv-display-medium`：长边 1600px、AVIF、质量 80（系列网格、日志封面）
-   - `tplv-thumb-square`：800×800 居中裁剪、AVIF、质量 78（备用缩略图）
-3. **绑定自定义域名**（可选但推荐）：把 `img.shellyxiao.com` CNAME 到火山的访问域名。要求：在火山控制台先把图片域名加白名单，且需要 ICP 备案。
+### 未来若要换 CDN（火山 veImageX / Cloudflare 等）
 
-### 怎么上传照片
-
-**方式 1：控制台手动上传**（最简单）
-- 控制台 → "资源管理" → 上传文件。
-- 上传后会得到一个 key，例如 `letters/2024-03-window.jpg`。
-- 把这个 key 填到 markdown 的 `image` 字段（不需要写完整 URL）：
-
-```markdown
----
-image: "letters/2024-03-window.jpg"
-alt_zh: "..."
----
-```
-
-代码会自动拼成 `https://{IMAGE_HOST}/letters/2024-03-window.jpg~tplv-display-large.avif`。
-
-**方式 2：用脚本批量上传**（适合一次传几十张）
-- 火山有 Node SDK `@volcengine/openapi`。我们可以加一个 `scripts/upload.mjs`，
-  扫描本地 `private/photos-raw/` 文件夹，把每张上传并打印对应的 key —— 等你需要的时候告诉我。
-
-### 兼容期
-
-`src/lib/image.ts` 里的 `imageUrl()` 对**非 veImageX 的 URL（如 picsum）直接放行**，所以现在 demo 还能跑。一旦你的真实图片传到 veImageX，把 `image:` 字段改成 key（或完整 URL），下次构建就走 veImageX 模板了。
+当照片量逼近 1GB、或想要访问时实时裁图，再考虑迁到 CDN。代码已经为此留好口子：
+`src/lib/image.ts` 的 `imageUrl()` 会处理远程 URL，`image:` 字段同时支持本地路径和
+`https://` URL。届时把 `image:` 改成 CDN URL 即可，组件代码不用动。
+（veImageX 的服务 / 模板 / 上传脚本 `scripts/upload.mjs` 已经写好，需要时启用。）
 
 ---
 
@@ -217,8 +220,7 @@ alt_zh: "..."
 
 - [ ] 改站名（`src/layouts/BaseLayout.astro` 和 `src/components/Header.astro` 里的 "无名工作室 / Untitled Studio" → "肖双巧 / Shelly Xiao" 之类）
 - [ ] 注册域名（建议 `shellyxiao.com`，可选加 `shellyxiao.photo`）
-- [ ] 在 veImageX 创建模板 + 服务，把 `PUBLIC_IMAGE_HOST` 填到 Cloudflare Pages 环境变量
-- [ ] 上传几张真实照片到 veImageX，把 `src/content/photos/*.md` 里的 image 字段从 picsum 换成 key
+- [ ] 用真实照片替换 demo 内容（`npm run prep` 压缩 → 写 `src/content/photos/*.md`）
 - [ ] 自定义字体托管（思源宋体 / 思源黑体 woff2 放到 `public/fonts/`，在 `global.css` 里 `@font-face`）
 - [ ] 标签聚合页 `/tags/[tag]`
 - [ ] 站内搜索（Pagefind，纯静态、无后端）

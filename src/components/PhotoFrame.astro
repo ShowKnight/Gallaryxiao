@@ -1,6 +1,6 @@
 ---
 import { type Lang, useTranslations, pick } from "~/i18n/ui";
-import { imageUrl, imageSrcset } from "~/lib/image";
+import Img from "~/components/Img.astro";
 import type { CollectionEntry } from "astro:content";
 
 interface Props {
@@ -30,15 +30,12 @@ const dateStr = photo.data.date
 ---
 
 <figure class:list={["mx-auto", framed ? "gallery-frame" : ""]}>
-  <img
-    src={imageUrl(photo.data.image, { preset: "display-large" })}
-    srcset={imageSrcset(photo.data.image)}
-    sizes="(min-width: 1024px) 1024px, 100vw"
+  <Img
+    src={photo.data.image}
     alt={alt}
+    preset="large"
     width={photo.data.width}
     height={photo.data.height}
-    loading="lazy"
-    decoding="async"
     class="fade-in mx-auto max-h-[80vh] w-auto object-contain"
   />
 

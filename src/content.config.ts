@@ -4,14 +4,15 @@ import { glob } from 'astro/loaders';
 // ── Series (curated bodies of work, IBASHO-style) ─────────────────────────
 const series = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/series' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title_zh: z.string(),
     title_en: z.string(),
     year_start: z.number().int(),
     year_end: z.number().int().nullable().optional(), // null = ongoing
     intro_zh: z.string().optional(),
     intro_en: z.string().optional(),
-    cover: z.string().url().or(z.string().startsWith('/')), // CDN URL or local path
+    // Local file (e.g. ./_media/cover.jpg — Astro-optimized at build) OR a remote URL.
+    cover: image().or(z.string().url()).or(z.string().startsWith('/')),
     cover_alt_zh: z.string().optional(),
     cover_alt_en: z.string().optional(),
     photos: z.array(reference('photos')).default([]), // ordered photo references
@@ -24,8 +25,11 @@ const series = defineCollection({
 // ── Photos (atomic units; referenced by series & journal) ─────────────────
 const photos = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/photos' }),
-  schema: z.object({
-    image: z.string().url().or(z.string().startsWith('/')),
+  schema: ({ image }) => z.object({
+    // Local file (e.g. ./_media/photo.jpg — Astro-optimized at build) OR a remote URL.
+    image: image().or(z.string().url()).or(z.string().startsWith('/')),
+    // width/height are only needed for REMOTE images (to prevent layout shift).
+    // Local images carry their own dimensions, so leave these out.
     width: z.number().int().positive().optional(),
     height: z.number().int().positive().optional(),
     alt_zh: z.string(),
