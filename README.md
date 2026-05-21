@@ -148,6 +148,7 @@ src/
 3. 等工作流跑完，站点上线在 **https://showknight.github.io/Gallaryxiao/**。
 
 > 站点发布在子路径 `/Gallaryxiao/` 下，所以 `astro.config.mjs` 里设了 `base: '/Gallaryxiao/'`。
+> 注意大小写必须和仓库名 `Gallaryxiao` 完全一致 —— GitHub Pages 路径区分大小写。
 > 本地 `npm run dev` / `npm run preview` 也会带这个前缀（`http://localhost:4321/Gallaryxiao/`）。
 
 **换成自定义域名时**：把工作流里 build 步骤的环境变量设成 `SITE_URL=https://你的域名`

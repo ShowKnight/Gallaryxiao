@@ -9,9 +9,8 @@ import tailwindcss from '@tailwindcss/vite';
 // For a custom domain set SITE_URL=https://example.com and BASE_PATH=/.
 const SITE_URL = process.env.SITE_URL || 'https://showknight.github.io';
 
-// Sub-path the site is served under. GitHub Pages project sites live at
-// /<repo>/ — and the path is CASE-SENSITIVE, so it must match the repo
-// name exactly ("Gallaryxiao"). A custom domain should set BASE_PATH=/.
+// /<repo>/ — the path is CASE-SENSITIVE and must match the repo name
+// exactly ("Gallaryxiao"). A custom domain should set BASE_PATH=/.
 const BASE_PATH = process.env.BASE_PATH || '/Gallaryxiao/';
 
 // CDN host for the photographs (Volcano veImageX). Override per-env via env var.

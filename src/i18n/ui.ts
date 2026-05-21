@@ -9,8 +9,8 @@ export type Lang = keyof typeof languages;
 export const defaultLang: Lang = 'zh';
 
 // The site may be served under a sub-path (GitHub Pages project site).
-// import.meta.env.BASE_URL reflects astro.config `base` ("/gallaryxiao/" or "/").
-const BASE_TRIM = import.meta.env.BASE_URL.replace(/\/+$/, ''); // "/gallaryxiao" or ""
+// import.meta.env.BASE_URL reflects astro.config `base` ("/Gallaryxiao/" or "/").
+const BASE_TRIM = import.meta.env.BASE_URL.replace(/\/+$/, ''); // "/Gallaryxiao" or ""
 
 /** Remove the deploy base prefix from a real URL pathname. */
 function stripBase(pathname: string): string {
