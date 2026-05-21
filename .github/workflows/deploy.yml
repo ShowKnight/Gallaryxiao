@@ -21,6 +21,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Pages
+        # enablement: true auto-enables GitHub Pages (Source = GitHub Actions)
+        # on the first run, so no manual toggle in repo Settings is needed.
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Build with Astro
         uses: withastro/action@v3
         with:
