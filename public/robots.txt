@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://showknight.github.io/gallaryxiao/sitemap-index.xml
+Sitemap: https://showknight.github.io/Gallaryxiao/sitemap-index.xml

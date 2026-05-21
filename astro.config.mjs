@@ -11,7 +11,9 @@ const SITE_URL = process.env.SITE_URL || 'https://showknight.github.io';
 
 // Sub-path the site is served under. GitHub Pages project sites live at
 // /<repo>/; a custom domain or user/org page should set BASE_PATH=/.
-const BASE_PATH = process.env.BASE_PATH || '/gallaryxiao/';
+// Must match the repository name's exact casing — GitHub Pages paths
+// are case-sensitive, so the repo "Gallaryxiao" is served at /Gallaryxiao/.
+const BASE_PATH = process.env.BASE_PATH || '/Gallaryxiao/';
 
 // CDN host for the photographs (Volcano veImageX). Override per-env via env var.
 const IMAGE_HOST = process.env.IMAGE_HOST || 'tos-cn-i-XXXX.volccdn.com';
